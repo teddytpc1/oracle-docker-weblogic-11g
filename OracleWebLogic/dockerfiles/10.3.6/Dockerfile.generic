@@ -60,6 +60,8 @@ COPY $SILENT_XML /u01/
 # -------------------------------------
 RUN rpm -ivh /u01/$JAVA_RPM && \
     rm /u01/$JAVA_RPM
+RUN ls /usr/java/jdk1.7.0_75/jre/lib/security/java.security | xargs sed -i 's,securerandom.source=file:/dev/urandom,securerandom.source=file:/dev/./urandom,g'
+
 
 # Adjust file permissions, go to /u01 as user 'oracle' to proceed with WLS installation
 # -------------------------------------

@@ -85,6 +85,36 @@ create('myQueueSubDeployment', 'SubDeployment')
 # cd('JDBCConnectionPoolParams/NO_NAME_0')
 # set('TestTableName','SYSTABLES')
 
+# Create Machine
+cd('/')
+create('ArcorDevops','Machine')
+
+cd('/Machines/ArcorDevops/')
+create('ArcorDevops','NodeManager')
+cd('/Machines/ArcorDevops/NodeManager/ArcorDevops')
+set('ListenAddress','172.17.0.2')
+set('ListenPort',5557)
+set('NMType','Plain')
+
+# Create Cluster
+cd('/')
+create('ECUP_CLUSTER','Cluster')
+
+# Create MS
+cd('/')
+create('WLS_ECUP1','Server')
+
+cd('/Servers/WLS_ECUP1')
+set('ListenPort',7101)
+set('ListenAddress','172.17.0.2')
+set('Machine','ArcorDevops')
+assign('Server','WLS_ECUP1','Cluster','ECUP_CLUSTER')
+
+# Asignar AdminServer a NodeManager
+cd('/Servers/AdminServer')
+set('Machine','ArcorDevops')
+
+
 # Target resources to the servers
 # ===============================
 cd('/')

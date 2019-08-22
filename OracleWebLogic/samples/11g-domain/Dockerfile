@@ -15,7 +15,7 @@
 
 # Pull base image
 # ---------------
-FROM oracle/weblogic:10.3.6-dev
+FROM oracle/weblogic:10.3.6
 
 # Maintainer
 # ----------
