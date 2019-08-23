@@ -7,6 +7,17 @@
 # ==============================================
 admin_port = int(os.environ.get("ADMIN_PORT", "7001"))
 admin_pass = os.environ.get("ADMIN_PASSWORD", "welcome1")
+admin_listen_address = 'wlsadmin'
+admin_nm_name = 'wlsadmin'
+admin_nm_listen_port = 5556
+
+
+ecup_ms_name = 'WLS_ECUP1'
+ecup_ms_listen_address = 'wlsecup'
+ecup_ms_listen_port = 7101
+ecup_nm_name = 'wlsecup'
+ecup_nm_listen_port = 5556
+ecup_cluster_name = 'ECUP_CLUSTER'
 
 # Open default domain template
 # ======================
@@ -15,7 +26,7 @@ readTemplate("/u01/oracle/weblogic/wlserver/common/templates/domains/wls.jar")
 # Configure the Administration Server and SSL port.
 # =========================================================
 cd('Servers/AdminServer')
-set('ListenAddress','0.0.0.0')
+set('ListenAddress', admin_listen_address)
 set('ListenPort', admin_port)
 
 create('AdminServer','SSL')
@@ -85,35 +96,50 @@ create('myQueueSubDeployment', 'SubDeployment')
 # cd('JDBCConnectionPoolParams/NO_NAME_0')
 # set('TestTableName','SYSTABLES')
 
-# Create Machine
+# Create Machine Admin
 cd('/')
-create('ArcorDevops','Machine')
+create(admin_nm_name,'Machine')
 
-cd('/Machines/ArcorDevops/')
-create('ArcorDevops','NodeManager')
-cd('/Machines/ArcorDevops/NodeManager/ArcorDevops')
-set('ListenAddress','172.17.0.2')
-set('ListenPort',5557)
+cd('/Machines/' + admin_nm_name  +'/')
+create(admin_nm_name,'NodeManager')
+cd('/Machines/' + admin_nm_name + '/NodeManager/' + admin_nm_name)
+set('ListenAddress', admin_listen_address)
+set('ListenPort', admin_nm_listen_port)
+set('NMType','Plain')
+
+# Create Machine ECUP
+cd('/')
+create(ecup_nm_name,'Machine')
+
+cd('/Machines/' +  ecup_nm_name +'/')
+create(ecup_nm_name,'NodeManager')
+cd('/Machines/' + ecup_nm_name + '/NodeManager/' + ecup_nm_name)
+set('ListenAddress', ecup_ms_listen_address)
+set('ListenPort', ecup_nm_listen_port)
 set('NMType','Plain')
 
 # Create Cluster
 cd('/')
-create('ECUP_CLUSTER','Cluster')
+create(ecup_cluster_name,'Cluster')
 
 # Create MS
 cd('/')
-create('WLS_ECUP1','Server')
+create(ecup_ms_name,'Server')
 
-cd('/Servers/WLS_ECUP1')
-set('ListenPort',7101)
-set('ListenAddress','172.17.0.2')
-set('Machine','ArcorDevops')
-assign('Server','WLS_ECUP1','Cluster','ECUP_CLUSTER')
+cd('/Servers/' + ecup_ms_name)
+set('ListenPort',ecup_ms_listen_port)
+set('ListenAddress', ecup_ms_listen_address)
+set('Machine',ecup_nm_name)
+assign('Server',ecup_ms_name,'Cluster',ecup_cluster_name)
 
 # Asignar AdminServer a NodeManager
 cd('/Servers/AdminServer')
-set('Machine','ArcorDevops')
+set('Machine',admin_nm_name)
 
+# Set NM Username and Password
+#cd('/SecurityConfiguration/base_domain')
+#set('NodeManagerUsername','weblogic')
+#set('NodeManagerPasswordEncrypted','welcome1')
 
 # Target resources to the servers
 # ===============================
@@ -130,6 +156,12 @@ setOption('ServerStartMode','prod')
 cd('/')
 writeDomain('/u01/oracle/weblogic/user_projects/domains/base_domain')
 closeTemplate()
+
+readDomain('/u01/oracle/weblogic/user_projects/domains/base_domain')
+cd('/SecurityConfiguration/base_domain')
+set('NodeManagerUsername','weblogic')
+set('NodeManagerPasswordEncrypted','welcome1')
+updateDomain()
 
 # Exit WLST
 # =========
