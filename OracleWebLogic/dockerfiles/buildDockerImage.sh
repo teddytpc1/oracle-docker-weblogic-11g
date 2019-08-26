@@ -103,3 +103,9 @@ else
   echo "WebLogic Docker Image was NOT successfully created. Check the output and correct any reported problems with the docker build operation."
 fi
 
+docker build -t oracle/weblogic:10.3.6-wlsadmin ../../samples/11g-domain/
+docker run --net wlsnw --name wlsadmin -d -i oracle/weblogic:10.3.6-wlsadmin
+docker commit wlsadmin  oracle/weblogic:10.3.6-wlsadmin2
+docker build -t oracle/weblogic:10.3.6-ecup ../../samples/11g-domain/ecup/
+docker run --net wlsnw --name  wlsecup -d -i oracle/weblogic:10.3.6-ecup /u01/oracle/weblogic/user_projects/domains/base_domain/bin/startManagedWebLogic.sh
+
