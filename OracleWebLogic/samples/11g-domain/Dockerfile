@@ -38,14 +38,21 @@ COPY container-scripts/* /u01/oracle/
 USER root
 RUN echo ". /u01/oracle/weblogic/user_projects/domains/base_domain/bin/setDomainEnv.sh" >> /root/.bashrc && \
     echo "export PATH=$PATH:/u01/oracle/weblogic/wlserver/server/bin:/u01/oracle/weblogic/wlserver/common/bin:/u01/oracle/weblogic/user_projects/domains/base_domain/bin" >> /root/.bashrc
+RUN mkdir /u01/oracle/scripts
+COPY admin-scripts/* /u01/oracle/scripts/
+RUN chown -R oracle:oracle /u01/oracle/scripts/
 
 # Configuration of WLS Domain
 USER oracle
+
 WORKDIR /u01/oracle/weblogic
 RUN /u01/oracle/weblogic/wlserver/common/bin/wlst.sh -skipWLSModuleScanning /u01/oracle/create-wls-domain.py && \
     mkdir -p /u01/oracle/weblogic/user_projects/domains/base_domain/servers/AdminServer/security && \
     echo "username=weblogic" > /u01/oracle/weblogic/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties && \ 
     echo "password=$ADMIN_PASSWORD" >> /u01/oracle/weblogic/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties && \
+    mkdir -p /u01/oracle/weblogic/user_projects/domains/base_domain/servers/WLS_ECUP1/security && \
+    echo "username=weblogic" > /u01/oracle/weblogic/user_projects/domains/base_domain/servers/WLS_ECUP1/security/boot.properties && \
+    echo "password=$ADMIN_PASSWORD" >> /u01/oracle/weblogic/user_projects/domains/base_domain/servers/WLS_ECUP1/security/boot.properties && \
     echo ". /u01/oracle/weblogic/user_projects/domains/base_domain/bin/setDomainEnv.sh" >> /u01/oracle/.bashrc && \ 
     echo "export PATH=$PATH:/u01/oracle/weblogic/wlserver/server/bin:/u01/oracle/weblogic/wlserver/common/bin:/u01/oracle/weblogic/user_projects/domains/base_domain/bin" >> /u01/oracle/.bashrc && \
     rm /u01/oracle/create-wls-domain.py 
@@ -60,3 +67,5 @@ ENV PATH $PATH:/u01/oracle/weblogic/wlserver/server/bin:/u01/oracle/weblogic/wls
 
 # Define default command to start bash. 
 CMD ["startWebLogic.sh"]
+
+#RUN ["/u01/oracle/scripts/start.sh"]
