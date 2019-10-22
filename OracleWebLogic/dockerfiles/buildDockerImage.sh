@@ -103,9 +103,16 @@ else
   echo "WebLogic Docker Image was NOT successfully created. Check the output and correct any reported problems with the docker build operation."
 fi
 
-docker build -t oracle/weblogic:10.3.6-wlsadmin ../../samples/11g-domain/
-docker run --net wlsnw --name wlsadmin -d -i oracle/weblogic:10.3.6-wlsadmin
-docker commit wlsadmin  oracle/weblogic:10.3.6-wlsadmin2
-docker build -t oracle/weblogic:10.3.6-ecup ../../samples/11g-domain/ecup/
-docker run --net wlsnw --name  wlsecup -d -i oracle/weblogic:10.3.6-ecup /u01/oracle/weblogic/user_projects/domains/base_domain/bin/startManagedWebLogic.sh
+#docker build -t oracle/weblogic:10.3.6-wlsadmin ../../samples/11g-domain/
+#docker run --net wlsnw --name wlsdomain -v /opt/arcor/domain:/u01/oracle/weblogic/user_projects/domains/base_domain -d -i oracle/weblogic:10.3.6
+docker run --net wlsnw --name wlsdomain  -d -i oracle/weblogic:10.3.6
+docker exec -u oracle -it wlsdomain bash /u01/oracle/container-scripts/create-wls-domain.sh
+docker cp  wlsdomain:/u01/oracle/weblogic/user_projects/domains/base_domain /opt/arcor/domain/
+sudo chown -R arcor:arcor /opt/arcor/domain/
+docker stop wlsdomain
+#docker rm wlsdomain
+docker run --net wlsnw --name wlsadmin -v /opt/arcor/domain/base_domain:/u01/oracle/weblogic/user_projects/domains/base_domain -p 7001:7001 -d -i oracle/weblogic:10.3.6 /u01/oracle/weblogic/user_projects/domains/base_domain/bin/startWebLogic.sh
+##docker commit wlsadmin  oracle/weblogic:10.3.6-wlsadmin2
+##docker build -t oracle/weblogic:10.3.6-ecup ../../samples/11g-domain/ecup/
+docker run --net wlsnw --name  wlsecup -v /opt/arcor/domain/base_domain:/u01/oracle/weblogic/user_projects/domains/base_domain -p 7101:7101 -d -i oracle/weblogic:10.3.6 /u01/oracle/weblogic/user_projects/domains/base_domain/bin/startManagedWebLogic.sh WLS_ECUP1
 
