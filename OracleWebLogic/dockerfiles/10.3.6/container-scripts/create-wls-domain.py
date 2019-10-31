@@ -6,7 +6,7 @@
 # Author: bruno.borges@oracle.com
 # ==============================================
 admin_port = int(os.environ.get("ADMIN_PORT", "7001"))
-admin_pass = os.environ.get("ADMIN_PASSWORD", "welcome1")
+admin_pass = 'welcome1'
 admin_listen_address = 'wlsadmin'
 admin_nm_name = 'wlsadmin'
 admin_nm_listen_port = 5556
